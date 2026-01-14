@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=yes">
+
+
+  <!--标题-->
+  <title>生命在于运动</title>
+
+  <!--Echarts-->
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@4.6.0/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.js"></script>
+  <!-- <script src="libs/node_modules/ol-echarts/dist/ol-echarts.js"></script> -->
+
+  <!--FontAwesome开源库-->
+  <link type="text/css" rel="stylesheet" href="libs/font-awesome-4.7.0/css/font-awesome.min.css">
+
+
+  <!-- 开源库jQuery -->
+  <script src="libs/jquery-1.11.2.min.js"></script>
+
+  <!-- 百度API -->
+  <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=kB5yeVizxgKa82lXGOdvTiEpyzPeEzSx"></script>
+  <script type="text/javascript"
+    src="https://fastly.jsdelivr.net/npm/echarts@4.6.0/dist/extension/bmap.min.js"></script>
+
+
+  <script type="text/javascript"
+    src="https://api.map.baidu.com/api?v=1.0&&type=webgl&ak=kB5yeVizxgKa82lXGOdvTiEpyzPeEzSx"></script>
+
+</head>
+
+<style>
+  #header {
+    /*position的设置很关键，不加的话在手机端竖屏显示区域会在左上方且无法填满*/
+    position: fixed;
+    width: 100%;
+    height: 50px;
+    z-index: 0;
+    position: absolute;
+
+    background-color: rgba(0, 0, 0, 0.2);
+    vertical-align: middle;
+  }
+
+  #header #title {
+    position: fixed;
+
+    width: 550px;
+    height: 100%;
+    margin: 0 auto;
+    /*设置logo*/
+    background-image: url('./images/department_logo/blue_cn_dp.png'), url('./images/校徽+中英文火炬/组合1：校徽+中英文校名-左右/LOGO.png');
+    background-size: auto 100%, auto 260px;
+    background-position: 100% 50%, 0% 50%;
+    background-repeat: no-repeat;
+  }
+
+  * {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    text-decoration: none;
+
+  }
+
+  .sidebar {
+    position: fixed;
+    left: -400px;
+    width: 300px;
+    height: 100%;
+    background: rgba(0, 63, 67, 1);
+    transition: all .5s ease;
+    z-index: 1;
+  }
+
+  .sidebar .top {
+    font-size: 22px;
+    color: #fff;
+    text-align: center;
+    height: 60px;
+    line-height: 51px;
+    background-color: rgb(14, 44, 70);
+    user-select: none;
+
+  }
+
+  .sidebar ul a {
+    display: block;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    line-height: 45px;
+    font-size: 18px;
+    color: #fff;
+    box-sizing: border-box;
+    border-top: 1px solid rgba(255, 255, 255, .1);
+    border-bottom: 1px solid rgb(17, 73, 118);
+    transition: .4s;
+  }
+
+  ul li:hover a {
+    padding-left: 30px;
+    font-size:25px;
+    color: #5587f4;
+    border-left: 5px solid #5587f4;
+    transition: all 0.5s;
+  }
+
+  .sidebar ul a i {
+    margin-right: 16px;
+  }
+
+  #check {
+    display: none;
+    margin-top: 20px;
+  }
+
+  label #btn,
+  label #cancel {
+    position: fixed;
+    cursor: pointer;
+    background-color: #0c587e;
+    border-radius: 3px;
+  }
+
+  label #btn {
+    left: 5px;
+    top: 7px;
+    font-size: 25px;
+    color: #fff;
+    padding: 6px 10px;
+    transition: all .5s;
+    z-index: 1;
+  }
+
+  label #cancel {
+    z-index: 2;
+    left: -145px;
+    top: 10px;
+    font-size: 25px;
+    color: rgb(188, 190, 223);
+    padding: 4px 9px;
+    transition: all .5s ease;
+  }
+
+  #check:checked~.sidebar {
+    left: 0;
+  }
+
+  #check:checked~label #btn {
+    left: 10px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #check:checked~label #cancel {
+    left: 350px;
+    z-index: 2;
+
+  }
+
+  #check:checked~.content {
+    margin-left: 300px;
+  }
+
+  #datadisplay {
+    background-color: rgba(106, 113, 108, 0.2);
+    margin-right: 5px;
+    width: 25%;
+    height: 100%;
+    margin-top: 55px
+  }
+
+  /*科考信息窗口的可滑动css*/
+  #img-content {
+    width: 100%;
+
+    overflow-x: auto;
+  }
+
+  .img-list {
+    display: flex;
+    width: 2400px;
+  }
+
+  .img-list .img-list-item {
+    width: 100%;
+    height: 100%;
+  }
+
+  .img-list .img-list-item+.img-list-item {
+    margin-left: 20px;
+  }
+
+  .img-list .img-list-item img {
+    width: 100%;
+    height: 100%;
+  }
+  .content {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    transition: all .5s;
+    display: flex;
+    justify-content: space-around;
+    z-index: 0;
+    flex:1;
+    
+  }
+  .pages {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    margin-top: 50px;
+    
+  }
+
+  #container_iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+</style>
+
+<body>
+
+  <!--网页标题部分-->
+  <div id="header">
+
+    <div id="title"></div>
+  </div>
+
+  <!--设置开启与关闭时的卡片开关-->
+  <input type="checkbox" id="check">
+  <label for="check">
+    <i class="fa fa-bars" id="btn"> More</i>
+    <i class="fa fa-times" id="cancel"></i>
+  </label>
+
+  <!--打开时的卡片图层管理区-->
+  <div class="sidebar">
+    <div class="top">Hi~</div>
+    <ul>
+      <li style="text-align: center;">
+        <a href="https://www.xstones.wiki/sustech" target="container_iframe" style="display:inline">
+          <i class="fa fa-plane" aria-hidden="true"></i>逃离南科大 &nbsp<i class="fa fa-file-video-o" aria-hidden="true"></i>
+        </a>
+      </li>
+    </ul>
+
+    <ul>
+      <li style="text-align: center;">
+        <a href="http://danmuji.yommyko.live:7002" target="container_iframe" style="display:inline">
+          <i class="fa fa-plane" aria-hidden="true"></i>danmuji &nbsp<i class="fa fa-file-video-o" aria-hidden="true"></i>
+        </a>
+      </li>
+    </ul>
+
+    <ul>
+      <li style="text-align: center;">
+        <a href="https://drive.xstones.wiki" target="container_iframe" style="display:inline">
+          <i class="fa fa-plane" aria-hidden="true"></i>drive &nbsp<i class="fa fa-file-video-o" aria-hidden="true"></i>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+
+  <!--主地图展示区-->
+  <div class="content" id="content">
+  <div class="pages">
+      <iframe id="container_iframe" name="container_iframe" scrolling="yes">
+      </iframe>
+  </div>
+    <!-- http://ess.sustech.edu.cn/New-detail-id-655.html -->
+
+  </div>
+</body>
+<script>
+
+ /**系统初始默认页面 **/
+ $('#container_iframe').attr("src", "https://yommyko.xyz");
+
+</script>
+
+</html>
