@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI模型导航中心</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f8fafc;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+
+        .search-filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #475569;
+            border-radius: 12px;
+            color: #f8fafc;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 12px 24px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #475569;
+            border-radius: 10px;
+            color: #cbd5e1;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .filter-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .model-card {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid #475569;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .model-card:hover {
+            transform: translateY(-8px);
+            border-color: #3b82f6;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .model-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        }
+
+        .model-card-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .model-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .model-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #f8fafc;
+        }
+
+        .model-type {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .model-description {
+            color: #94a3b8;
+            margin-bottom: 25px;
+            flex-grow: 1;
+        }
+
+        .model-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .model-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .model-link:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .model-link i {
+            margin-right: 8px;
+        }
+
+        .model-country {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+        }
+
+        .model-country i {
+            margin-right: 5px;
+        }
+
+        .add-model-section {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 16px;
+            padding: 30px;
+            border: 2px dashed #475569;
+            text-align: center;
+            margin-bottom: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .add-model-section:hover {
+            border-color: #3b82f6;
+            background: rgba(30, 41, 59, 0.9);
+        }
+
+        .add-model-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #f8fafc;
+        }
+
+        .add-model-section p {
+            color: #94a3b8;
+            margin-bottom: 25px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .add-model-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 30px;
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid #3b82f6;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-model-btn:hover {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .add-model-btn i {
+            margin-right: 8px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            border-top: 1px solid #334155;
+            margin-top: 20px;
+        }
+
+        footer a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .models-grid {
+                grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+                gap: 20px;
+            }
+            
+            .search-filter-container {
+                flex-direction: column;
+            }
+            
+            .search-box {
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .models-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-robot"></i> AI模型导航中心</h1>
+            <p class="subtitle">一键访问国内外主流AI模型官网，高效便捷的AI工具导航页面。点击卡片可直达官方网站，支持按类型和地区筛选。</p>
+            
+            <div class="search-filter-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="搜索AI模型名称...">
+                </div>
+                
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">全部模型</button>
+                    <button class="filter-btn" data-filter="domestic">国内模型</button>
+                    <button class="filter-btn" data-filter="international">国外模型</button>
+                    <button class="filter-btn" data-filter="text">文本模型</button>
+                    <button class="filter-btn" data-filter="multimodal">多模态</button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- <main>
+            <div class="models-grid" id="modelsContainer">
+                <!-- AI模型卡片将通过JavaScript动态生成 -->
+            </div>
+            
+            <div class="add-model-section">
+                <h3><i class="fas fa-plus-circle"></i> 添加新模型</h3>
+                <p>想要添加其他AI模型到导航页面吗？点击下方按钮，按照指引添加您需要的新模型链接。</p>
+                <div class="add-model-btn" id="addModelBtn">
+                    <i class="fas fa-plus"></i> 添加新模型
+                </div>
+            </div>
+        </main> -->
+        
+        <footer>
+            <p>© 2023 AI模型导航中心 | 设计用于便捷访问各大AI模型官网 | <a href="https://github.com" target="_blank">在GitHub上查看源代码</a></p>
+            <p>提示：点击模型卡片上的"访问官网"按钮可直接跳转，使用筛选功能可快速定位特定类型的模型。</p>
+        </footer>
+    </div>
+
+    <script>
+        // AI模型数据
+        const aiModels = [
+            {
+                id: 1,
+                name: "DeepSeek",
+                description: "深度求索公司开发的通用大语言模型，在数学、代码和逻辑推理方面表现优秀，支持128K上下文长度。",
+                url: "https://chat.deepseek.com",
+                type: ["text", "domestic"],
+                icon: "fas fa-brain",
+                iconColor: "#10b981",
+                country: "中国"
+            },
+            {
+                id: 2,
+                name: "豆包(字节)",
+                description: "字节跳动推出的AI对话助手，基于云雀大模型，提供文本对话、创作和知识问答等服务。",
+                url: "https://www.doubao.com",
+                type: ["text", "multimodal", "domestic"],
+                icon: "fas fa-seedling",
+                iconColor: "#f59e0b",
+                country: "中国"
+            },
+            {
+                id: 3,
+                name: "通义千问",
+                description: "阿里巴巴推出的大语言模型，具备强大的中文理解能力，支持多种任务和长文本处理。",
+                url: "https://www.qianwen.com",
+                type: ["text", "multimodal", "domestic"],
+                icon: "fas fa-comments",
+                iconColor: "#3b82f6",
+                country: "中国"
+            },
+            {
+                id: 4,
+                name: "ChatGPT",
+                description: "OpenAI开发的对话式AI模型，支持自然语言对话、文本生成、代码编写等多种任务。",
+                url: "https://chat.openai.com",
+                type: ["text", "multimodal", "international"],
+                icon: "fas fa-bolt",
+                iconColor: "#10b981",
+                country: "美国"
+            },
+            {
+                id: 5,
+                name: "Gemini",
+                description: "Google开发的多模态AI模型，原生支持文本、图像、音频和视频理解与生成。",
+                url: "https://gemini.google.com",
+                type: ["multimodal", "international"],
+                icon: "fas fa-gem",
+                iconColor: "#8b5cf6",
+                country: "美国"
+            },
+            {
+                id: 6,
+                name: "Claude",
+                description: "Anthropic开发的AI助手，以安全性和长上下文处理能力著称，支持200K上下文长度。",
+                url: "https://claude.ai",
+                type: ["text", "international"],
+                icon: "fas fa-user-tie",
+                iconColor: "#ef4444",
+                country: "美国"
+            },
+            {
+                id: 7,
+                name: "Grok",
+                description: "xAI公司开发的具有幽默感的AI模型，实时访问X平台信息，以直率回答风格为特点。",
+                url: "https://grok.x.ai",
+                type: ["text", "international"],
+                icon: "fas fa-rocket",
+                iconColor: "#ec4899",
+                country: "美国"
+            },
+            {
+                id: 8,
+                name: "文心一言",
+                description: "百度研发的知识增强大语言模型，具备强大的中文理解和生成能力，集成百度搜索能力。",
+                url: "https://yiyan.baidu.com",
+                type: ["text", "multimodal", "domestic"],
+                icon: "fas fa-yin-yang",
+                iconColor: "#3b82f6",
+                country: "中国"
+            },
+            {
+                id: 9,
+                name: "智谱清言",
+                description: "智谱AI开发的对话式大模型，基于GLM系列模型，在数学、代码和中文任务上表现优异。",
+                url: "https://chatglm.cn",
+                type: ["text", "domestic"],
+                icon: "fas fa-lightbulb",
+                iconColor: "#f59e0b",
+                country: "中国"
+            },
+            {
+                id: 10,
+                name: "Kimi",
+                description: "月之暗面公司开发的智能助手，支持超长上下文（200万字），擅长文档分析和信息整理。",
+                url: "https://kimi.moonshot.cn",
+                type: ["text", "domestic"],
+                icon: "fas fa-moon",
+                iconColor: "#8b5cf6",
+                country: "中国"
+            }
+        ];
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            const modelsContainer = document.getElementById('modelsContainer');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const searchInput = document.getElementById('searchInput');
+            const addModelBtn = document.getElementById('addModelBtn');
+            
+            let currentFilter = 'all';
+            let searchQuery = '';
+            
+            // 渲染模型卡片
+            function renderModels(filter = 'all', query = '') {
+                modelsContainer.innerHTML = '';
+                
+                const filteredModels = aiModels.filter(model => {
+                    // 筛选条件
+                    const matchesFilter = filter === 'all' || model.type.includes(filter);
+                    // 搜索条件
+                    const matchesSearch = model.name.toLowerCase().includes(query.toLowerCase()) || 
+                                        model.description.toLowerCase().includes(query.toLowerCase());
+                    
+                    return matchesFilter && matchesSearch;
+                });
+                
+                if (filteredModels.length === 0) {
+                    modelsContainer.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #94a3b8;">
+                            <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                            <h3>未找到匹配的AI模型</h3>
+                            <p>尝试使用其他关键词或筛选条件</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                filteredModels.forEach(model => {
+                    const modelCard = document.createElement('div');
+                    modelCard.className = 'model-card';
+                    
+                    // 确定模型类型显示文本
+                    let typeText = '';
+                    if (model.type.includes('text') && model.type.includes('multimodal')) {
+                        typeText = '文本/多模态';
+                    } else if (model.type.includes('text')) {
+                        typeText = '文本模型';
+                    } else if (model.type.includes('multimodal')) {
+                        typeText = '多模态模型';
+                    }
+                    
+                    // 确定地区
+                    const isDomestic = model.type.includes('domestic');
+                    
+                    modelCard.innerHTML = `
+                        <div class="model-card-header">
+                            <div class="model-icon" style="background: ${model.iconColor}20; color: ${model.iconColor}">
+                                <i class="${model.icon}"></i>
+                            </div>
+                            <div>
+                                <h3 class="model-name">${model.name}</h3>
+                                <span class="model-type">${typeText}</span>
+                            </div>
+                        </div>
+                        <p class="model-description">${model.description}</p>
+                        <div class="model-footer">
+                            <a href="${model.url}" target="_blank" class="model-link">
+                                <i class="fas fa-external-link-alt"></i> 访问官网
+                            </a>
+                            <div class="model-country">
+                                <i class="fas fa-globe"></i> ${model.country}
+                            </div>
+                        </div>
+                    `;
+                    
+                    modelsContainer.appendChild(modelCard);
+                });
+            }
+            
+            // 初始渲染
+            renderModels();
+            
+            // 筛选按钮点击事件
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 更新活动按钮
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 更新筛选条件并重新渲染
+                    currentFilter = this.getAttribute('data-filter');
+                    renderModels(currentFilter, searchQuery);
+                });
+            });
+            
+            // 搜索框输入事件
+            searchInput.addEventListener('input', function() {
+                searchQuery = this.value;
+                renderModels(currentFilter, searchQuery);
+            });
+            
+            // 添加新模型按钮点击事件
+            addModelBtn.addEventListener('click', function() {
+                const newModelName = prompt("请输入要添加的AI模型名称：");
+                if (newModelName) {
+                    const newModelUrl = prompt("请输入该模型的官方网站URL：");
+                    if (newModelUrl) {
+                        // 简单验证URL格式
+                        if (!newModelUrl.startsWith('http')) {
+                            alert("URL格式不正确，请确保以http://或https://开头");
+                            return;
+                        }
+                        
+                        // 在实际应用中，这里可以将新模型添加到数据库或本地存储
+                        alert(`已成功添加模型: ${newModelName}\n网站: ${newModelUrl}\n\n（此演示版本不会永久保存，实际使用中需要后端支持）`);
+                        
+                        // 模拟添加到模型列表
+                        const newId = aiModels.length + 1;
+                        aiModels.push({
+                            id: newId,
+                            name: newModelName,
+                            description: "新添加的AI模型，详细信息待补充。",
+                            url: newModelUrl,
+                            type: ["text"],
+                            icon: "fas fa-plus",
+                            iconColor: "#8b5cf6",
+                            country: "未知"
+                        });
+                        
+                        // 重新渲染模型列表
+                        renderModels(currentFilter, searchQuery);
+                        
+                        // 滚动到新添加的模型位置
+                        window.scrollTo({
+                            top: modelsContainer.offsetTop - 100,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+            
+            // 添加示例：点击模型卡片时显示简单提示
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.model-card')) {
+                    const card = e.target.closest('.model-card');
+                    const modelName = card.querySelector('.model-name').textContent;
+                    
+                    // 可以在这里添加更多交互功能
+                    console.log(`点击了${modelName}卡片`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
